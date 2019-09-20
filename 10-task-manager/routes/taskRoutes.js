@@ -2,16 +2,22 @@ const express = require('express'),
     router = express.Router(),
     taskService = require('../services/taskService');
 
-router.get('/', (req, res, next) => {
+router.get('/', async (req, res, next) => {
     //res.json(taskService.getAll());
     // taskService.getAll((taskList, err) => {
     //     res.json(taskList);
     // });
 
-    taskService
-        .getAll()
-        .then(taskList => res.json(taskList))
-        .catch(err => next(err));
+    // taskService
+    //     .getAll()
+    //     .then(taskList => res.json(taskList))
+    //     .catch(err => next(err));
+    try{
+        const taskList =  await taskService.getAll()
+        res.json(taskList);
+    } catch (err) {
+        next(err);
+    }
 });
 
 router.get('/:id', (req, res, next) => {

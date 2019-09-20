@@ -10,25 +10,34 @@ function getAll(){
     return taskDb.getData();
 }
 
-function get(taskId){
-    return taskDb
-        .getData()
-        .then(taskList => taskList.find(task => task.id === taskId))
+async function get(taskId){
+    // return taskDb
+    //     .getData()
+    //     .then(taskList => taskList.find(task => task.id === taskId))
+
+      const taskList = await taskDb.getData();
+      return taskList.find(task => task.id === taskId);
 }
 
-function addNew(taskData){
-    return taskDb
-        .getData()
-        .then(taskList => {
-            const newTaskId = taskList.reduce((result, task) => task.id > result ?  task.id : result, 0) + 1,
-                newTask = { ...taskData, id : newTaskId};
-            taskList.push(newTask);
-            return taskDb
-                .saveData(taskList)
-                .then(() => newTask);
-        })
-        
+async function addNew(taskData){
+    // return taskDb
+    //     .getData()
+    //     .then(taskList => {
+    //         const newTaskId = taskList.reduce((result, task) => task.id > result ?  task.id : result, 0) + 1,
+    //             newTask = { ...taskData, id : newTaskId};
+    //         taskList.push(newTask);
+    //         return taskDb
+    //             .saveData(taskList)
+    //             .then(() => newTask);
+    //     })
+
     
+        const taskList = await taskDb.getData();
+        const newTaskId = taskList.reduce((result, task) => task.id > result ?  task.id : result, 0) + 1,
+                newTask = { ...taskData, id : newTaskId};
+        taskList.push(newTask);
+        await taskDb.saveData(taskList);
+        return newTask;
 }
 
 function update(taskIdToUpdate, updatedTask){
