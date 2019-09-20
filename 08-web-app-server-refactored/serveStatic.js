@@ -7,36 +7,21 @@ function isStatic(resourceName){
     return staticResExtns.indexOf(path.extname(resourceName)) >= 0;
 }
 
-module.exports = function(req, res, next){
-    const resourceName = req.parsedUrl.pathname === '/' ? '/index.html' : req.parsedUrl.pathname;
-    
-    if (isStatic(resourceName)){
-		const resourceFullName = path.join(__dirname, resourceName);
-
-        if (!fs.existsSync(resourceFullName)){
-            res.statusCode = 404;
-            res.end();
-            return;
-        }
-        /*
-        const fileContents = fs.readFileSync(resourceFullName);
-        res.write(fileContents);
-        res.end();
-        */
-        const stream = fs.createReadStream(resourceFullName);
-        //stream.pipe(res);
+module.exports = function(publicFolderPath){
+    return function(req, res, next){
+        const resourceName = req.parsedUrl.pathname === '/' ? '/index.html' : req.parsedUrl.pathname;
         
-        stream.on('data', chunk => {
-            console.log('[@serveStatic] serving file chunk');
-            res.write(chunk);
-        });
-        stream.on('end', () => {
-            console.log('[@serveStatic] ending response');
-            res.end();
+        if (isStatic(resourceName)){
+            const resourceFullName = path.join(publicFolderPath, resourceName);
+            if (!fs.existsSync(resourceFullName))
+                return next();
+            
+            const stream = fs.createReadStream(resourceFullName);
+            stream.pipe(res);
+            stream.on('end', next);
+            
+        } else {
             next();
-        });
-        
-    } else {
-        next();
-    }
+        }
+    };
 };
