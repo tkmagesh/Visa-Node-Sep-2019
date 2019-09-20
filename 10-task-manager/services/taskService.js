@@ -6,21 +6,29 @@ let taskList = [
 ];
 
 
-function getAll(callback){
-    taskDb.getData((err, taskList) => {
-        callback(err, taskList);
-    })
+function getAll(){
+    return taskDb.getData();
 }
 
 function get(taskId){
-    return taskList.find(task => task.id === taskId);
+    return taskDb
+        .getData()
+        .then(taskList => taskList.find(task => task.id === taskId))
 }
 
 function addNew(taskData){
-    const newTaskId = taskList.reduce((result, task) => task.id > result ?  task.id : result, 0) + 1,
-        newTask = { ...taskData, id : newTaskId};
-    taskList.push(newTask);
-    return newTask;
+    return taskDb
+        .getData()
+        .then(taskList => {
+            const newTaskId = taskList.reduce((result, task) => task.id > result ?  task.id : result, 0) + 1,
+                newTask = { ...taskData, id : newTaskId};
+            taskList.push(newTask);
+            return taskDb
+                .saveData(taskList)
+                .then(() => newTask);
+        })
+        
+    
 }
 
 function update(taskIdToUpdate, updatedTask){

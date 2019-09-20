@@ -1,10 +1,41 @@
-const fs = require('fs');
+const fs = require('fs'),
+    path = require('path');
+const dbFileName = path.join('./data/db.json');
 
+/*
 function getData(callback){
-    fs.readFile(path.join('../data/db.json'), { encoding : 'utf8'}, (err, fileContents) => {
+    fs.readFile(dbFileName, { encoding : 'utf8'}, (err, fileContents) => {
         if (err) return callback(err);
         let taskList = JSON.parse(fileContents);
         return callback(null, taskList);
     })
-
 }
+
+function saveData(taskList, callback){
+    fs.writeFile(dbFileName, JSON.stringify(taskList), callback);
+}
+*/
+
+function getData(){
+    const promise = new Promise(function(resolveFn, rejectFn){
+        fs.readFile(dbFileName, { encoding : 'utf8'}, (err, fileContents) => {
+            if (err) return rejectFn(err);
+            let taskList = JSON.parse(fileContents);
+            return resolveFn(taskList);
+        })
+    });
+    return promise;
+}
+
+function saveData(taskList){
+    const promise = new Promise(function(resolveFn, rejectFn){
+        fs.writeFile(dbFileName, JSON.stringify(taskList), function(err){
+            if (err) return rejectFn(err);
+            return resolveFn(null);
+        });
+    });
+    return promise;
+    
+}
+
+module.exports = { getData, saveData };

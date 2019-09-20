@@ -4,25 +4,37 @@ const express = require('express'),
 
 router.get('/', (req, res, next) => {
     //res.json(taskService.getAll());
-    taskService.getAll((taskList, err) => {
-        res.json(taskList);
-    })
+    // taskService.getAll((taskList, err) => {
+    //     res.json(taskList);
+    // });
+
+    taskService
+        .getAll()
+        .then(taskList => res.json(taskList))
+        .catch(err => next(err));
 });
 
 router.get('/:id', (req, res, next) => {
-    const taskId = parseInt(req.params.id),
-        result = taskService.get(taskId);
-    if (result){
-        res.json(result);
-    } else {
-        res.status(404).end();
-    }
+    const taskId = parseInt(req.params.id);
+    taskService.get(taskId)
+        .then(result =>{
+            if (result){
+                res.json(result);
+            } else {
+                res.status(404).end();
+            }
+        });
+    
 });
 
 router.post('/', (req, res, next) => {
     const taskData = req.body;
-    const newTask = taskService.addNew(taskData);
-    res.status(201).json(newTask);
+    taskService
+        .addNew(taskData)
+        .then(newTask => {
+            res.status(201).json(newTask);
+        });
+    
 })
 
 router.put('/:id', (req, res, next) => {
