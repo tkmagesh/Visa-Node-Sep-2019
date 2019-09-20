@@ -3,7 +3,10 @@ const express = require('express'),
     taskService = require('../services/taskService');
 
 router.get('/', (req, res, next) => {
-    res.json(taskService.getAll());
+    //res.json(taskService.getAll());
+    taskService.getAll((taskList, err) => {
+        res.json(taskList);
+    })
 });
 
 router.get('/:id', (req, res, next) => {
