@@ -1,18 +1,14 @@
 const express = require('express'),
-    router = express.Router();
-
-let taskList = [
-    {id : 1, name : 'Learn JavaScript', isCompleted : false},
-    {id : 2, name : 'Master Node.js', isCompleted : true},
-    {id : 3, name : 'Plan vacation', isCompleted : false},
-];
+    router = express.Router(),
+    taskService = require('../services/taskService');
 
 router.get('/', (req, res, next) => {
-    res.json(taskList);
+    res.json(taskService.getAll());
 });
 
 router.get('/:id', (req, res, next) => {
-    const result = taskList.find(task => task.id === parseInt(req.params.id));
+    const taskId = parseInt(req.params.id),
+        result = taskService.get(taskId);
     if (result){
         res.json(result);
     } else {
@@ -21,19 +17,16 @@ router.get('/:id', (req, res, next) => {
 });
 
 router.post('/', (req, res, next) => {
-    const taskData = req.body,
-        newTaskId = taskList.reduce((result, task) => task.id > result ?  task.id : result, 0) + 1,
-        newTask = { ...taskData, id : newTaskId};
-    taskList.push(newTask);
+    const taskData = req.body;
+    const newTask = taskService.addNew(taskData);
     res.status(201).json(newTask);
 })
 
 router.put('/:id', (req, res, next) => {
     const taskIdToUpdate = parseInt(req.params.id),
-        taskToUpdate = taskList.find(task => task.id === taskIdToUpdate),
-        updatedTask = req.body;
-    if (taskToUpdate){
-        taskList = taskList.map(task => task.id === taskIdToUpdate ? updatedTask : task);
+        updatedTaskData = req.body;
+    const updatedTask = taskService.update(taskIdToUpdate, updatedTaskData);
+    if (updatedTask){
         res.json(updatedTask);
     } else {
         res.status(404).end();
@@ -41,11 +34,8 @@ router.put('/:id', (req, res, next) => {
 })
 
 router.delete('/:id', (req, res, next) => {
-    const taskIdToDelete = parseInt(req.params.id),
-        taskToDelete = taskList.find(task => task.id === taskIdToDelete);
-
-    if (taskToDelete){
-        taskList = taskList.filter(task => task.id !== taskIdToDelete);
+    const taskIdToDelete = parseInt(req.params.id);
+    if (taskService.remove(taskIdToDelete)){
         res.json(null);
     } else {
         res.status(404).end();
